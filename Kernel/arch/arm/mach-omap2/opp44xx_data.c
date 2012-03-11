@@ -23,7 +23,7 @@
 #include <linux/module.h>
 #include <linux/err.h>
 #include <linux/delay.h>
-#if defined (CONFIG_MACH_LGE_CX2)
+#if defined (CONFIG_MACH_LGE_CX2) || defined (CONFIG_OC)
 #include <linux/io.h>
 #endif
 
@@ -38,9 +38,9 @@
 #include "cm-regbits-44xx.h"
 extern bool dss_get_mainclk_state(void);
 
-#if defined (CONFIG_MACH_LGE_CX2)
+#if defined (CONFIG_MACH_LGE_CX2) || defined (CONFIG_OC)
 #define TNT_FREQ 1200000000
-#define OMAP44XX_CONTROL_FUSE_MPU_OPPTNT		0x24C
+#define OMAP44XX_CONTROL_FUSE_MPU_OPPTNT		0x24D
 #define CTRL_FUSE_OPP_VDD_MPU_3 (OMAP443X_SCM_BASE + OMAP44XX_CONTROL_FUSE_MPU_OPPTNT)
 #endif
 
@@ -116,11 +116,11 @@ static struct omap_opp_def __initdata omap44xx_opp_def_list[] = {
 	OMAP_OPP_DEF("mpu", true, 600000000, 1200000),
 	/* MPU OPP3 - OPP-Turbo */
 	OMAP_OPP_DEF("mpu", true, 800000000, 1313000),
-    #if defined (CONFIG_MACH_LGE_CX2)
+    #if defined (CONFIG_MACH_LGE_CX2) || defined (CONFIG_OC)
 	/* MPU OPP4 - OPP-SB */
 	OMAP_OPP_DEF("mpu", true, 1008000000, 1374000),
 	/* MPU OPP4 - OPP-TNT */
-	OMAP_OPP_DEF("mpu", false, TNT_FREQ, 1375000),
+	OMAP_OPP_DEF("mpu", true, TNT_FREQ, 1375000),
     #else
 	/* MPU OPP4 - OPP-SB */
 	OMAP_OPP_DEF("mpu", true, 1008000000, 1375000),
@@ -184,9 +184,9 @@ static struct omap_opp_def __initdata omap44xx_opp_def_list[] = {
 	/* SGX OPPLP - DPLL cascading */
 	OMAP_OPP_DEF("gpu", false, 196608000, 1005000),
 	/* SGX OPP1 - OPP50 */
-	OMAP_OPP_DEF("gpu", true, 153600000, 1025000),
+	OMAP_OPP_DEF("gpu", true, 200000000, 1025000),
 	/* SGX OPP2 - OPP100 */
-	OMAP_OPP_DEF("gpu", true, 307200000, 1200000),
+	OMAP_OPP_DEF("gpu", true, 390000000, 1200000),
 
 	/* HSI OPPLP - DPLL cascading */
 	OMAP_OPP_DEF("hsi", false, 98304000, 1005000),
@@ -541,7 +541,7 @@ int __init omap4_pm_init_opp_table(void)
 	struct device *dev;
 	struct clk *gpu_fclk;
 	int i, r;
-        #if defined (CONFIG_MACH_LGE_CX2)
+        #if defined (CONFIG_MACH_LGE_CX2) || defined (CONFIG_OC)
 	struct omap_opp *tnt_opp;
 	int has_tnt_opp = 0;
 	#endif
@@ -593,7 +593,7 @@ int __init omap4_pm_init_opp_table(void)
 		opp_populate_rate_fns(dev, omap4_mpu_set_rate,
 				omap4_mpu_get_rate);
 
-#if defined (CONFIG_MACH_LGE_CX2)
+#if defined (CONFIG_MACH_LGE_CX2) || defined (CONFIG_OC)
 	/* Enable 1.2Gz OPP for silicon that supports it
 	 * TODO: determine if FUSE_OPP_VDD_MPU_3 is a reliable source to
 	 * determine 1.2Gz availability.
