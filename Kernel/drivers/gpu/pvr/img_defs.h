@@ -76,7 +76,8 @@ typedef char				TCHAR, *PTCHAR, *PTSTR;
 #define _TCHAR_DEFINED
 #endif 
 
-
+#define __linux__
+			#if defined(__linux__) || defined(__METAG)
 
 				#define IMG_CALLCONV
 				#define IMG_INTERNAL	__attribute__((visibility("hidden")))
@@ -84,6 +85,9 @@ typedef char				TCHAR, *PTCHAR, *PTSTR;
 				#define IMG_IMPORT
 				#define IMG_RESTRICT	__restrict__
 
+			#else
+					#error("define an OS")
+			#endif
 
 #ifndef IMG_ABORT
 	#define IMG_ABORT()	abort()
