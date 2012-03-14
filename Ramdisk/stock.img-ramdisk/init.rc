@@ -31,6 +31,7 @@ loglevel 7
     export BT_FW_PATH /system/lib/firmware    
     export TMPDIR /data/local/tmp
 
+
 # LGE_MERGE_S
 start bootlogo    
 # LGE_MERGE_E

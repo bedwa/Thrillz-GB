@@ -23,9 +23,7 @@
 #include <linux/module.h>
 #include <linux/err.h>
 #include <linux/delay.h>
-#if defined (CONFIG_MACH_LGE_CX2) || defined (CONFIG_OC)
 #include <linux/io.h>
-#endif
 
 #include <plat/opp.h>
 #include <plat/clock.h>
@@ -38,11 +36,10 @@
 #include "cm-regbits-44xx.h"
 extern bool dss_get_mainclk_state(void);
 
-#if defined (CONFIG_MACH_LGE_CX2) || defined (CONFIG_OC)
+
 #define TNT_FREQ 1200000000
 #define OMAP44XX_CONTROL_FUSE_MPU_OPPTNT		0x24D
 #define CTRL_FUSE_OPP_VDD_MPU_3 (OMAP443X_SCM_BASE + OMAP44XX_CONTROL_FUSE_MPU_OPPTNT)
-#endif
 
 
 static struct clk *dpll_mpu_clk, *iva_clk, *dsp_clk, *l3_clk, *core_m2_clk;
@@ -116,16 +113,10 @@ static struct omap_opp_def __initdata omap44xx_opp_def_list[] = {
 	OMAP_OPP_DEF("mpu", true, 600000000, 1200000),
 	/* MPU OPP3 - OPP-Turbo */
 	OMAP_OPP_DEF("mpu", true, 800000000, 1313000),
-    #if defined (CONFIG_MACH_LGE_CX2) || defined (CONFIG_OC)
 	/* MPU OPP4 - OPP-SB */
 	OMAP_OPP_DEF("mpu", true, 1008000000, 1374000),
 	/* MPU OPP4 - OPP-TNT */
 	OMAP_OPP_DEF("mpu", true, TNT_FREQ, 1375000),
-    #else
-	/* MPU OPP4 - OPP-SB */
-	OMAP_OPP_DEF("mpu", true, 1008000000, 1375000),
-    #endif
-
 	/* IVA OPPLP - DPLL cascading */
 	OMAP_OPP_DEF("iva", false,  98304000, 1011000),
 	/* IVA OPP1 - OPP50 */
@@ -541,10 +532,8 @@ int __init omap4_pm_init_opp_table(void)
 	struct device *dev;
 	struct clk *gpu_fclk;
 	int i, r;
-        #if defined (CONFIG_MACH_LGE_CX2) || defined (CONFIG_OC)
 	struct omap_opp *tnt_opp;
 	int has_tnt_opp = 0;
-	#endif
 
 	/*
 	 * Allow multiple calls, but initialize only if not already initalized
@@ -593,28 +582,6 @@ int __init omap4_pm_init_opp_table(void)
 		opp_populate_rate_fns(dev, omap4_mpu_set_rate,
 				omap4_mpu_get_rate);
 
-#if defined (CONFIG_MACH_LGE_CX2) || defined (CONFIG_OC)
-	/* Enable 1.2Gz OPP for silicon that supports it
-	 * TODO: determine if FUSE_OPP_VDD_MPU_3 is a reliable source to
-	 * determine 1.2Gz availability.
-	 */
-	has_tnt_opp = __raw_readl(OMAP2_L4_IO_ADDRESS(CTRL_FUSE_OPP_VDD_MPU_3));
-	has_tnt_opp &= 0xFFFFFF;
-
-	if (has_tnt_opp) {
-		tnt_opp = opp_find_freq_exact(dev, TNT_FREQ, false);
-		if (IS_ERR(tnt_opp))
-		{
-			printk(KERN_ERR"[1.2GHz support Fail] %d\n",tnt_opp);
-			pr_err("unable to find OPP for 1.2Gz\n");
-		}
-		else
-		{
-			printk(KERN_ERR"[1.2GHz support success] %d\n",tnt_opp);
-			opp_enable(tnt_opp);
-		}
-	}
-#endif
 
 
 	dev = omap2_get_iva_device();
